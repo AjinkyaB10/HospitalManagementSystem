@@ -52,14 +52,24 @@ public class AdminController {
         return "admin/add-doctor";
     }
 
-    // Add doctor submit
     @PostMapping("/doctors/add")
     public String addDoctorSubmit(@ModelAttribute User user,
-                                   @ModelAttribute Doctor doctor) {
+                                  @ModelAttribute Doctor doctor,
+                                  Model model) {
+
+        if (userService.existsByEmail(user.getEmail())) {
+            model.addAttribute("error", "Email already registered!");
+            model.addAttribute("user", user);
+            model.addAttribute("doctor", doctor);
+            return "admin/add-doctor";
+        }
+
         user.setRole(Role.DOCTOR);
         User savedUser = userService.saveUser(user);
+
         doctor.setUser(savedUser);
         doctorService.saveDoctor(doctor);
+
         return "redirect:/admin/doctors";
     }
 

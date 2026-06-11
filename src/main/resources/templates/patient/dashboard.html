@@ -22,7 +22,7 @@
 <div class="container mt-5">
     <div class="card shadow border-0">
         <div class="card-body p-4">
-            <h2 class="text-info" th:text="'Welcome, ' + ${patient.user.name}">Welcome Patient</h2>
+            <h2 class="text-info" th:text="'Welcome, ' + ${patient.user != null ? patient.user.name : 'Patient'}">Welcome Patient</h2>
             <p><strong>Total Appointments:</strong> <span th:text="${appointments.size()}"></span></p>
             <a th:href="@{/patient/book-appointment}" class="btn btn-info text-white">Book Appointment</a>
         </div>

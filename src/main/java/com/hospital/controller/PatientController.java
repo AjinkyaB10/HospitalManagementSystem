@@ -2,6 +2,7 @@ package com.hospital.controller;
 
 import com.hospital.model.Appointment;
 import com.hospital.model.Patient;
+import com.hospital.model.User;
 import com.hospital.service.AppointmentService;
 import com.hospital.service.DoctorService;
 import com.hospital.service.PatientService;
@@ -28,16 +29,19 @@ public class PatientController {
     @Autowired
     private DoctorService doctorService;
 
-    // Patient Dashboard
     @GetMapping("/dashboard")
     public String dashboard(Principal principal, Model model) {
-        userService.findByEmail(principal.getName()).ifPresent(user -> {
-            patientService.getPatientByUser(user).ifPresent(patient -> {
-                model.addAttribute("patient", patient);
-                model.addAttribute("appointments",
-                    appointmentService.getAppointmentsByPatient(patient));
-            });
+        User user = userService.findByEmail(principal.getName()).orElseThrow();
+
+        Patient patient = patientService.getPatientByUser(user).orElseGet(() -> {
+            Patient newPatient = new Patient();
+            newPatient.setUser(user);
+            return patientService.savePatient(newPatient);
         });
+
+        model.addAttribute("patient", patient);
+        model.addAttribute("appointments", appointmentService.getAppointmentsByPatient(patient));
+
         return "patient/dashboard";
     }
 
@@ -96,8 +100,22 @@ public class PatientController {
 
     // Update profile submit
     @PostMapping("/profile")
-    public String profileSubmit(@ModelAttribute Patient patient) {
-        patientService.savePatient(patient);
+    public String profileSubmit(@ModelAttribute Patient patient, Principal principal) {
+        userService.findByEmail(principal.getName()).ifPresent(user -> {
+            Patient existingPatient = patientService.getPatientByUser(user)
+                .orElseGet(() -> {
+                    Patient newPatient = new Patient();
+                    newPatient.setUser(user);
+                    return newPatient;
+                });
+
+            existingPatient.setPhone(patient.getPhone());
+            existingPatient.setAge(patient.getAge());
+            existingPatient.setBloodGroup(patient.getBloodGroup());
+            existingPatient.setAddress(patient.getAddress());
+
+            patientService.savePatient(existingPatient);
+        });
         return "redirect:/patient/dashboard";
     }
 
