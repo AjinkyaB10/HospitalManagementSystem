@@ -30,7 +30,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        // ✅ Get token from Authorization header
         String authHeader = request.getHeader("Authorization");
         String token = null;
         String email = null;
@@ -42,7 +41,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
         }
 
-        // ✅ Set authentication in security context
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
             UsernamePasswordAuthenticationToken authToken =

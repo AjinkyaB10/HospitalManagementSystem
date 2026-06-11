@@ -33,19 +33,16 @@ public class AuthController {
     @Autowired
     private JwtUtils jwtUtils;
 
-    // ✅ Register
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         if (userService.existsByEmail(user.getEmail())) {
             return ResponseEntity.badRequest().body("Email already registered!");
         }
-        // Default role is PATIENT
         user.setRole(Role.PATIENT);
         userService.saveUser(user);
         return ResponseEntity.ok("User registered successfully!");
     }
 
-    // ✅ Login - returns JWT token
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest) {
         try {

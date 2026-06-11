@@ -29,7 +29,6 @@ public class PatientController {
     @Autowired
     private DoctorService doctorService;
 
-    // ✅ Dashboard
     @GetMapping("/dashboard")
     public ResponseEntity<?> dashboard(Principal principal) {
         User user = userService.findByEmail(principal.getName()).orElseThrow();
@@ -46,13 +45,11 @@ public class PatientController {
         return ResponseEntity.ok(response);
     }
 
-    // ✅ Get all doctors (for booking)
     @GetMapping("/doctors")
     public ResponseEntity<?> getDoctors() {
         return ResponseEntity.ok(doctorService.getAllDoctors());
     }
 
-    // ✅ Book appointment
     @PostMapping("/book-appointment")
     public ResponseEntity<?> bookAppointment(@RequestBody Map<String, Object> request,
                                               Principal principal) {
@@ -74,7 +71,6 @@ public class PatientController {
         return ResponseEntity.ok("Appointment booked successfully!");
     }
 
-    // ✅ View appointments
     @GetMapping("/appointments")
     public ResponseEntity<?> viewAppointments(Principal principal) {
         User user = userService.findByEmail(principal.getName()).orElseThrow();
@@ -82,14 +78,12 @@ public class PatientController {
         return ResponseEntity.ok(appointmentService.getAppointmentsByPatient(patient));
     }
 
-    // ✅ Cancel appointment
     @PutMapping("/appointments/cancel/{id}")
     public ResponseEntity<?> cancelAppointment(@PathVariable Long id) {
         appointmentService.updateStatus(id, AppointmentStatus.CANCELLED);
         return ResponseEntity.ok("Appointment cancelled!");
     }
 
-    // ✅ Get profile
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(Principal principal) {
         User user = userService.findByEmail(principal.getName()).orElseThrow();
@@ -97,7 +91,6 @@ public class PatientController {
         return ResponseEntity.ok(patient);
     }
 
-    // ✅ Update profile
     @PutMapping("/profile")
     public ResponseEntity<?> updateProfile(@RequestBody Patient updatedPatient,
                                             Principal principal) {

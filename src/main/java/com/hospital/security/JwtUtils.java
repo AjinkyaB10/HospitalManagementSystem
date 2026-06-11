@@ -17,7 +17,6 @@ public class JwtUtils {
     @Value("${app.jwt.expiration-ms}")
     private long jwtExpirationMs;
 
-    // ✅ Generate token from email
     public String generateToken(String email) {
         Key key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
         return Jwts.builder()
@@ -28,7 +27,6 @@ public class JwtUtils {
                 .compact();
     }
 
-    // ✅ Get email from token
     public String getEmailFromToken(String token) {
         Key key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
         return Jwts.parserBuilder()
@@ -39,7 +37,6 @@ public class JwtUtils {
                 .getSubject();
     }
 
-    // ✅ Validate token
     public boolean validateToken(String token) {
         try {
             Key key = Keys.hmacShaKeyFor(jwtSecret.getBytes());

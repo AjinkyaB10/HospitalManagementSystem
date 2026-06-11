@@ -31,13 +31,11 @@ public class SecurityConfig {
     @Autowired
     private JwtAuthFilter jwtAuthFilter;
 
-    // ✅ Password Encoder
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // ✅ Authentication Provider
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider auth = new DaoAuthenticationProvider();
@@ -46,14 +44,12 @@ public class SecurityConfig {
         return auth;
     }
 
-    // ✅ Authentication Manager
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
-    // ✅ CORS config - allows React frontend to call Spring Boot
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
@@ -70,7 +66,6 @@ public class SecurityConfig {
         return source;
     }
 
-    // ✅ Security Filter Chain - stateless JWT, no sessions
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -80,13 +75,10 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
             .authorizeHttpRequests(auth -> auth
-                // ✅ Public endpoints
                 .requestMatchers("/api/auth/**").permitAll()
-                // ✅ Role based access - FIXED: hasAuthority instead of hasRole
                 .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers("/api/doctor/**").hasAuthority("ROLE_DOCTOR")
                 .requestMatchers("/api/patient/**").hasAuthority("ROLE_PATIENT")
-                // Any other request needs authentication
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

@@ -30,7 +30,6 @@ public class AdminController {
     @Autowired
     private AppointmentService appointmentService;
 
-    // ✅ Dashboard stats
     @GetMapping("/dashboard")
     public ResponseEntity<Map<String, Object>> dashboard() {
         Map<String, Object> stats = new HashMap<>();
@@ -40,13 +39,11 @@ public class AdminController {
         return ResponseEntity.ok(stats);
     }
 
-    // ✅ Get all doctors
     @GetMapping("/doctors")
     public ResponseEntity<?> getAllDoctors() {
         return ResponseEntity.ok(doctorService.getAllDoctors());
     }
 
-    // ✅ Add doctor
     @PostMapping("/doctors/add")
     public ResponseEntity<?> addDoctor(@RequestBody Map<String, Object> request) {
         String email = (String) request.get("email");
@@ -74,20 +71,17 @@ public class AdminController {
         return ResponseEntity.ok("Doctor added successfully!");
     }
 
-    // ✅ Delete doctor
     @DeleteMapping("/doctors/delete/{id}")
     public ResponseEntity<?> deleteDoctor(@PathVariable Long id) {
         doctorService.deleteDoctor(id);
         return ResponseEntity.ok("Doctor deleted successfully!");
     }
 
-    // ✅ Get all patients
     @GetMapping("/patients")
     public ResponseEntity<?> getAllPatients() {
         return ResponseEntity.ok(patientService.getAllPatients());
     }
 
-    // ✅ Get all appointments
     @GetMapping("/appointments")
     public ResponseEntity<?> getAllAppointments() {
         return ResponseEntity.ok(appointmentService.getAllAppointments());

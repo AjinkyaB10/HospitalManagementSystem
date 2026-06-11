@@ -27,7 +27,6 @@ public class DoctorController {
     @Autowired
     private AppointmentService appointmentService;
 
-    // ✅ Dashboard
     @GetMapping("/dashboard")
     public ResponseEntity<?> dashboard(Principal principal) {
         User user = userService.findByEmail(principal.getName()).orElseThrow();
@@ -39,7 +38,6 @@ public class DoctorController {
         return ResponseEntity.ok(response);
     }
 
-    // ✅ View appointments
     @GetMapping("/appointments")
     public ResponseEntity<?> viewAppointments(Principal principal) {
         User user = userService.findByEmail(principal.getName()).orElseThrow();
@@ -47,21 +45,18 @@ public class DoctorController {
         return ResponseEntity.ok(appointmentService.getAppointmentsByDoctor(doctor));
     }
 
-    // ✅ Confirm appointment
     @PutMapping("/appointments/confirm/{id}")
     public ResponseEntity<?> confirmAppointment(@PathVariable Long id) {
         appointmentService.updateStatus(id, AppointmentStatus.CONFIRMED);
         return ResponseEntity.ok("Appointment confirmed!");
     }
 
-    // ✅ Cancel appointment
     @PutMapping("/appointments/cancel/{id}")
     public ResponseEntity<?> cancelAppointment(@PathVariable Long id) {
         appointmentService.updateStatus(id, AppointmentStatus.CANCELLED);
         return ResponseEntity.ok("Appointment cancelled!");
     }
 
-    // ✅ Get profile
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(Principal principal) {
         User user = userService.findByEmail(principal.getName()).orElseThrow();
@@ -69,7 +64,6 @@ public class DoctorController {
         return ResponseEntity.ok(doctor);
     }
 
-    // ✅ Update profile
     @PutMapping("/profile")
     public ResponseEntity<?> updateProfile(@RequestBody Doctor updatedDoctor,
                                             Principal principal) {
