@@ -17,6 +17,7 @@ public class Doctor {
     private User user;
 
     private String specialization;
+   
     private String experience;
     private String availableDays;
     private String availableTime;

@@ -2,17 +2,20 @@ package com.hospital.controller;
 
 import com.hospital.model.AppointmentStatus;
 import com.hospital.model.Doctor;
+import com.hospital.model.User;
 import com.hospital.service.AppointmentService;
 import com.hospital.service.DoctorService;
 import com.hospital.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.security.Principal;
 
-@Controller
-@RequestMapping("/doctor")
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/doctor")
 public class DoctorController {
 
     @Autowired
@@ -24,61 +27,62 @@ public class DoctorController {
     @Autowired
     private AppointmentService appointmentService;
 
-    // Doctor Dashboard
+    // ✅ Dashboard
     @GetMapping("/dashboard")
-    public String dashboard(Principal principal, Model model) {
-        userService.findByEmail(principal.getName()).ifPresent(user -> {
-            doctorService.getDoctorByUser(user).ifPresent(doctor -> {
-                model.addAttribute("doctor", doctor);
-                model.addAttribute("appointments",
-                    appointmentService.getAppointmentsByDoctor(doctor));
-            });
-        });
-        return "doctor/dashboard";
+    public ResponseEntity<?> dashboard(Principal principal) {
+        User user = userService.findByEmail(principal.getName()).orElseThrow();
+        Doctor doctor = doctorService.getDoctorByUser(user).orElseThrow();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("doctor", doctor);
+        response.put("appointments", appointmentService.getAppointmentsByDoctor(doctor));
+        return ResponseEntity.ok(response);
     }
 
-    // View appointments
+    // ✅ View appointments
     @GetMapping("/appointments")
-    public String viewAppointments(Principal principal, Model model) {
-        userService.findByEmail(principal.getName()).ifPresent(user -> {
-            doctorService.getDoctorByUser(user).ifPresent(doctor -> {
-                model.addAttribute("appointments",
-                    appointmentService.getAppointmentsByDoctor(doctor));
-            });
-        });
-        return "doctor/appointments";
+    public ResponseEntity<?> viewAppointments(Principal principal) {
+        User user = userService.findByEmail(principal.getName()).orElseThrow();
+        Doctor doctor = doctorService.getDoctorByUser(user).orElseThrow();
+        return ResponseEntity.ok(appointmentService.getAppointmentsByDoctor(doctor));
     }
 
-    // Confirm appointment
-    @GetMapping("/appointments/confirm/{id}")
-    public String confirmAppointment(@PathVariable Long id) {
+    // ✅ Confirm appointment
+    @PutMapping("/appointments/confirm/{id}")
+    public ResponseEntity<?> confirmAppointment(@PathVariable Long id) {
         appointmentService.updateStatus(id, AppointmentStatus.CONFIRMED);
-        return "redirect:/doctor/appointments";
+        return ResponseEntity.ok("Appointment confirmed!");
     }
 
-    // Cancel appointment
-    @GetMapping("/appointments/cancel/{id}")
-    public String cancelAppointment(@PathVariable Long id) {
+    // ✅ Cancel appointment
+    @PutMapping("/appointments/cancel/{id}")
+    public ResponseEntity<?> cancelAppointment(@PathVariable Long id) {
         appointmentService.updateStatus(id, AppointmentStatus.CANCELLED);
-        return "redirect:/doctor/appointments";
+        return ResponseEntity.ok("Appointment cancelled!");
     }
 
-    // Update profile form
+    // ✅ Get profile
     @GetMapping("/profile")
-    public String profileForm(Principal principal, Model model) {
-        userService.findByEmail(principal.getName()).ifPresent(user -> {
-            doctorService.getDoctorByUser(user).ifPresent(doctor -> {
-                model.addAttribute("doctor", doctor);
-            });
-        });
-        return "doctor/profile";
+    public ResponseEntity<?> getProfile(Principal principal) {
+        User user = userService.findByEmail(principal.getName()).orElseThrow();
+        Doctor doctor = doctorService.getDoctorByUser(user).orElseThrow();
+        return ResponseEntity.ok(doctor);
     }
 
-    // Update profile submit
-    @PostMapping("/profile")
-    public String profileSubmit(@ModelAttribute Doctor doctor) {
-        doctorService.saveDoctor(doctor);
-        return "redirect:/doctor/dashboard";
-    }
+    // ✅ Update profile
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateProfile(@RequestBody Doctor updatedDoctor,
+                                            Principal principal) {
+        User user = userService.findByEmail(principal.getName()).orElseThrow();
+        Doctor existing = doctorService.getDoctorByUser(user).orElseThrow();
 
+        existing.setSpecialization(updatedDoctor.getSpecialization());
+        existing.setExperience(updatedDoctor.getExperience());
+        existing.setAvailableDays(updatedDoctor.getAvailableDays());
+        existing.setAvailableTime(updatedDoctor.getAvailableTime());
+        existing.setFees(updatedDoctor.getFees());
+
+        doctorService.saveDoctor(existing);
+        return ResponseEntity.ok("Profile updated successfully!");
+    }
 }

@@ -8,12 +8,14 @@ import com.hospital.service.DoctorService;
 import com.hospital.service.PatientService;
 import com.hospital.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
-@RequestMapping("/admin")
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/admin")
 public class AdminController {
 
     @Autowired
@@ -28,70 +30,66 @@ public class AdminController {
     @Autowired
     private AppointmentService appointmentService;
 
-    // Admin Dashboard
+    // ✅ Dashboard stats
     @GetMapping("/dashboard")
-    public String dashboard(Model model) {
-        model.addAttribute("totalDoctors", doctorService.getAllDoctors().size());
-        model.addAttribute("totalPatients", patientService.getAllPatients().size());
-        model.addAttribute("totalAppointments", appointmentService.getAllAppointments().size());
-        return "admin/dashboard";
+    public ResponseEntity<Map<String, Object>> dashboard() {
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("totalDoctors", doctorService.getAllDoctors().size());
+        stats.put("totalPatients", patientService.getAllPatients().size());
+        stats.put("totalAppointments", appointmentService.getAllAppointments().size());
+        return ResponseEntity.ok(stats);
     }
 
-    // View all doctors
+    // ✅ Get all doctors
     @GetMapping("/doctors")
-    public String viewDoctors(Model model) {
-        model.addAttribute("doctors", doctorService.getAllDoctors());
-        return "admin/doctors";
+    public ResponseEntity<?> getAllDoctors() {
+        return ResponseEntity.ok(doctorService.getAllDoctors());
     }
 
-    // Add doctor form
-    @GetMapping("/doctors/add")
-    public String addDoctorForm(Model model) {
-        model.addAttribute("user", new User());
-        model.addAttribute("doctor", new Doctor());
-        return "admin/add-doctor";
-    }
-
+    // ✅ Add doctor
     @PostMapping("/doctors/add")
-    public String addDoctorSubmit(@ModelAttribute User user,
-                                  @ModelAttribute Doctor doctor,
-                                  Model model) {
-
-        if (userService.existsByEmail(user.getEmail())) {
-            model.addAttribute("error", "Email already registered!");
-            model.addAttribute("user", user);
-            model.addAttribute("doctor", doctor);
-            return "admin/add-doctor";
+    public ResponseEntity<?> addDoctor(@RequestBody Map<String, Object> request) {
+        String email = (String) request.get("email");
+        if (userService.existsByEmail(email)) {
+            return ResponseEntity.badRequest().body("Email already registered!");
         }
 
+        User user = new User();
+        user.setName((String) request.get("name"));
+        user.setEmail(email);
+        user.setPassword((String) request.get("password"));
         user.setRole(Role.DOCTOR);
         User savedUser = userService.saveUser(user);
 
+        Doctor doctor = new Doctor();
         doctor.setUser(savedUser);
+        doctor.setSpecialization((String) request.get("specialization"));
+        doctor.setExperience((String) request.get("experience"));
+        doctor.setAvailableDays((String) request.get("availableDays"));
+        doctor.setAvailableTime((String) request.get("availableTime"));
+        doctor.setFees(Double.parseDouble(request.get("fees").toString()));
+
         doctorService.saveDoctor(doctor);
 
-        return "redirect:/admin/doctors";
+        return ResponseEntity.ok("Doctor added successfully!");
     }
 
-    // Delete doctor
-    @GetMapping("/doctors/delete/{id}")
-    public String deleteDoctor(@PathVariable Long id) {
+    // ✅ Delete doctor
+    @DeleteMapping("/doctors/delete/{id}")
+    public ResponseEntity<?> deleteDoctor(@PathVariable Long id) {
         doctorService.deleteDoctor(id);
-        return "redirect:/admin/doctors";
+        return ResponseEntity.ok("Doctor deleted successfully!");
     }
 
-    // View all patients
+    // ✅ Get all patients
     @GetMapping("/patients")
-    public String viewPatients(Model model) {
-        model.addAttribute("patients", patientService.getAllPatients());
-        return "admin/patients";
+    public ResponseEntity<?> getAllPatients() {
+        return ResponseEntity.ok(patientService.getAllPatients());
     }
 
-    // View all appointments
+    // ✅ Get all appointments
     @GetMapping("/appointments")
-    public String viewAppointments(Model model) {
-        model.addAttribute("appointments", appointmentService.getAllAppointments());
-        return "admin/appointments";
+    public ResponseEntity<?> getAllAppointments() {
+        return ResponseEntity.ok(appointmentService.getAllAppointments());
     }
-
 }

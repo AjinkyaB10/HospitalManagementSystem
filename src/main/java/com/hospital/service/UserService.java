@@ -38,8 +38,13 @@ public class UserService {
         return userRepository.findById(id);
     }
 
+    // ✅ NEW: needed by JWT auth controller for login
+    public User getByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+    }
+
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
-
 }
