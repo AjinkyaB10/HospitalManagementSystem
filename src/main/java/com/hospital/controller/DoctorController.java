@@ -31,7 +31,6 @@ public class DoctorController {
     public ResponseEntity<?> dashboard(Principal principal) {
         User user = userService.findByEmail(principal.getName()).orElseThrow();
         Doctor doctor = doctorService.getDoctorByUser(user).orElseThrow();
-
         Map<String, Object> response = new HashMap<>();
         response.put("doctor", doctor);
         response.put("appointments", appointmentService.getAppointmentsByDoctor(doctor));

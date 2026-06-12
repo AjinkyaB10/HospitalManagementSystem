@@ -22,5 +22,6 @@ public class Doctor {
     private String availableDays;
     private String availableTime;
     private Double fees;
+    private String phone; 
 
 }
